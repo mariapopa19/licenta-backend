@@ -1,0 +1,38 @@
+const express = require("express");
+const dotenv = require("dotenv");
+
+const sequlize = require("./utils/database");
+const Comanda = require("./models/comenzi");
+const Firma = require("./models/firme");
+const PerioadaContractFirma = require("./models/perioada_contract_firme");
+const ProdusComanda = require("./models/produse_comanda");
+const Produs = require("./models/produse");
+const ProdusCosCumparaturi = require("./models/produse_cos_cumparaturi");
+const CosCumparaturi = require("./models/cos_cumparaturi");
+const Utilizator = require("./models/utilizatori");
+
+const app = express();
+dotenv.config();
+// console.log(process.env);
+
+Utilizator.hasMany(Comanda);
+Comanda.belongsTo(Utilizator);
+Comanda.belongsToMany(Produs, { through: ProdusComanda });
+Produs.belongsToMany(Comanda, { through: ProdusComanda });
+Utilizator.hasOne(CosCumparaturi);
+CosCumparaturi.belongsTo(Utilizator);
+CosCumparaturi.belongsToMany(Produs, { through: ProdusCosCumparaturi });
+Produs.belongsToMany(CosCumparaturi, { through: ProdusCosCumparaturi });
+Firma.hasMany(Produs);
+Produs.belongsTo(Firma, { constraints: true, onDelete: "CASCADE" });
+Firma.hasOne(PerioadaContractFirma);
+PerioadaContractFirma.belongsTo(Firma);
+
+sequlize
+  .sync({ force: true })
+  .then((res) => {
+    // console.log(res);
+    app.listen(4000);
+  })
+  .catch((err) => console.log(err));
+// app.listen(4000);
