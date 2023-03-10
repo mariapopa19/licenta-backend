@@ -1,5 +1,6 @@
 const express = require("express");
 const dotenv = require("dotenv");
+const bodyParser = require("body-parser");
 
 const sequlize = require("./utils/database");
 const Comanda = require("./models/comenzi");
@@ -11,8 +12,22 @@ const ProdusCosCumparaturi = require("./models/produse_cos_cumparaturi");
 const CosCumparaturi = require("./models/cos_cumparaturi");
 const Utilizator = require("./models/utilizatori");
 
+const authRoutes = require("./routes/auth");
+
+const errorMiddleware = require("./middlewares/error").error;
+
 const app = express();
 dotenv.config();
+
+app.use(bodyParser.json());
+
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Content-Security-Policy', 'script-src', '*')
+  next();
+});
 // console.log(process.env);
 
 Utilizator.hasMany(Comanda);
@@ -27,6 +42,10 @@ Firma.hasMany(Produs);
 Produs.belongsTo(Firma, { constraints: true, onDelete: "CASCADE" });
 Firma.hasOne(PerioadaContractFirma);
 PerioadaContractFirma.belongsTo(Firma);
+
+app.use("/auth", authRoutes);
+
+app.use(errorMiddleware);
 
 sequlize
   .sync({ force: true })
