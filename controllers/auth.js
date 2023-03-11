@@ -44,7 +44,7 @@ exports.login = async (req, res, next) => {
   let loadedUser;
   try {
     const utilizator = await Utilizator.findOne({ where: { email: email } });
-    if (!utilizator) {
+    if (utilizator === null) {
       const error = new Error("Nu exista utilizator cu acest email.");
       error.statusCode = 401;
       throw error;
@@ -59,12 +59,12 @@ exports.login = async (req, res, next) => {
     const token = jwt.sign(
       {
         email: loadedUser.email,
-        userId: loadedUser._id.toString(),
+        userId: loadedUser.id,
       },
       process.env.ACCESS_TOKEN_SECRET,
       { expiresIn: "1h" }
     );
-    res.status(200).json({ token: token, userId: loadedUser._id.toString() });
+    res.status(200).json({ token: token, userId: loadedUser.id });
   } catch (err) {
     if (!err.statusCode) {
       err.statusCode = 500;
