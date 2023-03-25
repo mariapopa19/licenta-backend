@@ -1,7 +1,7 @@
 const Sequelize = require("sequelize");
 const sequelize = require("../utils/database");
 
-const PerioadaContractFirma = sequelize.define("perioada-contract-firma", {
+const PerioadaContractFirma = sequelize.define("perioadaContractFirma", {
   id: {
     type: Sequelize.UUID,
     defaultValue: Sequelize.UUIDV4,

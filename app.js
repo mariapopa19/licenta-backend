@@ -53,6 +53,7 @@ app.use("/auth", authRoutes);
 app.use(errorMiddleware);
 
 sequlize
+  // .sync({ force: true })
   .sync()
   .then((res) => {
     // console.log(res);

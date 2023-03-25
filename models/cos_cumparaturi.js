@@ -1,7 +1,7 @@
 const Sequelize = require("sequelize");
 const sequelize = require("../utils/database");
 
-const CosCumparaturi = sequelize.define("cos-cumparaturi", {
+const CosCumparaturi = sequelize.define("cosCumparaturi", {
   id: {
     type: Sequelize.UUID,
     defaultValue: Sequelize.UUIDV4,

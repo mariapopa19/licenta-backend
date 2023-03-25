@@ -1,7 +1,7 @@
 const Sequelize = require("sequelize");
 const sequelize = require("../utils/database");
 
-const Utilizatori = sequelize.define("utilizatori", {
+const Utilizator = sequelize.define("utilizator", {
   id: {
     type: Sequelize.UUID,
     defaultValue: Sequelize.UUIDV4,
@@ -25,4 +25,4 @@ const Utilizatori = sequelize.define("utilizatori", {
  
 });
 
-module.exports = Utilizatori;
+module.exports = Utilizator;

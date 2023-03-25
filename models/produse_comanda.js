@@ -1,7 +1,7 @@
 const Sequelize = require("sequelize");
 const sequelize = require("../utils/database");
 
-const ProduseComanda = sequelize.define("produse-comanda", {
+const ProduseComanda = sequelize.define("produseComanda", {
   id: {
     type: Sequelize.UUID,
     defaultValue: Sequelize.UUIDV4,
