@@ -10,6 +10,7 @@ const Comanda = sequelize.define("comanda", {
   status: {
     type: Sequelize.STRING,
   },
+  cantitate: Sequelize.INTEGER,
   adresa: {
     type: Sequelize.STRING,
     allowNull: false,

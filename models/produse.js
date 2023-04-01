@@ -15,6 +15,14 @@ const Produs = sequelize.define("produs", {
     type: Sequelize.DOUBLE,
     allowNull: false,
   },
+  imageURL: {
+    type: Sequelize.STRING,
+    allowNull: false,
+  },
+  descriere: {
+    type: Sequelize.STRING,
+    allowNull: false,
+  },
 });
 
 module.exports = Produs;

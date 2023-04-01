@@ -12,8 +12,11 @@ const Produs = require("./models/produse");
 const ProdusCosCumparaturi = require("./models/produse_cos_cumparaturi");
 const CosCumparaturi = require("./models/cos_cumparaturi");
 const Utilizator = require("./models/utilizatori");
+const CategorieProdus = require("./models/categorie_produs");
 
 const authRoutes = require("./routes/auth");
+const shopRoutes = require("./routes/shop");
+const adminRoutes = require("./routes/admin");
 
 const errorMiddleware = require("./middlewares/error").error;
 
@@ -47,8 +50,12 @@ Firma.hasMany(Produs);
 Produs.belongsTo(Firma, { constraints: true, onDelete: "CASCADE" });
 Firma.hasOne(PerioadaContractFirma);
 PerioadaContractFirma.belongsTo(Firma);
+CategorieProdus.hasMany(Produs);
+Produs.belongsTo(CategorieProdus, { constraints: true });
 
 app.use("/auth", authRoutes);
+app.use("/shop", shopRoutes);
+app.use("/admin", adminRoutes);
 
 app.use(errorMiddleware);
 
