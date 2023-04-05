@@ -24,7 +24,7 @@ exports.getProduse = async (req, res, next) => {
 
 exports.getProdus = async (req, res, next) => {
   try {
-    const id = req.body.produsId;
+    const id = req.params.produsId;
     const produs = await Produs.findByPk(id);
     res.status(200).json({ message: "Produs găsit!", produs: produs });
   } catch (err) {
@@ -71,15 +71,64 @@ exports.postCosCumparaturi = async (req, res, next) => {
     }
 
     if (produs) {
-      const vecheaCantitate = produs.produseCosCumparaturi.cantitate;
+      const vecheaCantitate = produs.produsCosCumparaturi.cantitate;
       nouaCantitate = vecheaCantitate + 1;
     }
 
     const produsAdaugatInCos = await Produs.findByPk(prodId);
-    const rezultat = await cosCumpExistent.addProdus(produsAdaugatInCos, {
+    await cosCumpExistent.addProdus(produsAdaugatInCos, {
       through: { cantitate: nouaCantitate },
     });
-    res.status(200).json({ message: "Produs adaugat cu succes!" });
+    const result = await cosCumparaturi.getProduse({ where: { id: prodId } });
+    res
+      .status(200)
+      .json({ message: "Produs adaugat cu succes!", result: result });
+  } catch (err) {
+    if (!err.statusCode) {
+      err.statusCode = 500;
+    }
+    next(err);
+  }
+};
+
+exports.postScoateProdusCosCumparaturi = async (req, res, next) => {
+  try {
+    const userId = req.body.userId;
+    const prodId = req.body.prodId;
+    let cosCumpExistent;
+    let nouaCantitate = 1;
+
+    const utilizator = await Utilizator.findByPk(userId);
+    const cosCumparaturi = await utilizator.getCosCumparaturi();
+    cosCumpExistent = cosCumparaturi;
+    const produse = await cosCumparaturi.getProduse({ where: { id: prodId } });
+
+    let produs;
+    if (produse.length > 0) {
+      produs = produse[0];
+    }
+
+    const vecheaCantitate = produs.produsCosCumparaturi.cantitate;
+
+    if (produs && vecheaCantitate > 1) {
+      nouaCantitate = vecheaCantitate - 1;
+    } else {
+      const err = {
+        statusCode: 404,
+        message:
+          "Produsul are cantitatea mai mica de 2, pentru asta apeleaza ruta '/sterge-produs-cos-cumparaturi'",
+      };
+      throw err;
+    }
+
+    const produsAdaugatInCos = await Produs.findByPk(prodId);
+    await cosCumpExistent.addProdus(produsAdaugatInCos, {
+      through: { cantitate: nouaCantitate },
+    });
+    const result = await cosCumparaturi.getProduse({ where: { id: prodId } });
+    res
+      .status(200)
+      .json({ message: "Produs scazut din cos cu succes!", result: result });
   } catch (err) {
     if (!err.statusCode) {
       err.statusCode = 500;
@@ -97,7 +146,7 @@ exports.deleteStergeProdusCosCumparaturi = async (req, res, next) => {
     const produse = await cosCumparaturi.getProduse({ where: { id: prodId } });
     const produs = produse[0];
     const rezultat = await produs.produseCosCumparaturi.destroy();
-    res.status(200).json({ message: "Produs adaugat cu succes!" });
+    res.status(200).json({ message: "Produs sters din cos!" });
   } catch (err) {
     if (!err.statusCode) {
       err.statusCode = 500;
@@ -122,8 +171,7 @@ exports.postComanda = async (req, res, next) => {
     const comanda = await utilizator.createComanda({
       adresa: adresa,
       ziLivrare: ziLivrare,
-      intervalLivrare: intervalLivrare
-      
+      intervalLivrare: intervalLivrare,
     });
     const rezultat = await comanda.addProdus(
       produse.map((prod) => {
@@ -170,7 +218,9 @@ exports.getComanda = async (req, res, next) => {
       { where: { id: comandaId } },
       { include: ["products"] }
     );
-    res.status(200).json({message: 'Comanda afisata cu succes', comanda: comanda})
+    res
+      .status(200)
+      .json({ message: "Comanda afisata cu succes", comanda: comanda });
   } catch (err) {
     if (!err.statusCode) {
       err.statusCode = 500;

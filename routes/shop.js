@@ -4,9 +4,10 @@ const shopController = require("../controllers/shop");
 const router = express.Router();
 
 router.get("/produse", shopController.getProduse);
-router.get("/produs", shopController.getProdus);
+router.get("/produse/:produsId", shopController.getProdus);
 router.get("/cos-cumparaturi", shopController.getCosCumparaturi);
 router.post("/cos-cumparaturi", shopController.postCosCumparaturi);
+router.post('/scoate-produs-cos', shopController.postScoateProdusCosCumparaturi)
 router.delete(
   "/sterge-produs-cos-cumparaturi",
   shopController.deleteStergeProdusCosCumparaturi

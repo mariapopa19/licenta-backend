@@ -62,6 +62,7 @@ app.use(errorMiddleware);
 sequlize
   // .sync({ force: true })
   .sync()
+  // .drop()
   .then((res) => {
     // console.log(res);
     app.listen(4000);

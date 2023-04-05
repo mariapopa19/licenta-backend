@@ -5,7 +5,7 @@ const Utilizator = require("../models/utilizatori");
 
 const router = express.Router();
 
-router.put(
+router.post(
   "/signup",
   [
     body("email")
@@ -23,6 +23,8 @@ router.put(
   ],
   authController.signup
 );
+router.get('/verify/:token', authController.verificaTokenEmail)
+
 router.post(
   "/login",
   [
@@ -31,5 +33,8 @@ router.post(
   ],
   authController.login
 );
+
+router.get('/new-pass', authController.getSchimbaParola)
+router.post('/new-pass/:token', authController.postSchimbaParola)
 
 module.exports = router;
