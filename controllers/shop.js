@@ -1,8 +1,4 @@
 const Produs = require("../models/produse");
-const CosCumparaturi = require("../models/cos_cumparaturi");
-const ProduseCosCumparaturi = require("../models/produse_cos_cumparaturi");
-const Comanda = require("../models/comenzi");
-const ProduseComanda = require("../models/produse_comanda");
 const Utilizator = require("../models/utilizatori");
 
 exports.getProduse = async (req, res, next) => {
@@ -139,14 +135,17 @@ exports.postScoateProdusCosCumparaturi = async (req, res, next) => {
 
 exports.deleteStergeProdusCosCumparaturi = async (req, res, next) => {
   try {
-    const prodId = req.body.prodId;
-    const userId = req.body.userId;
+    const prodId = req.params.prodId;
+    const userId = req.params.userId;
     const utilizator = await Utilizator.findByPk(userId);
     const cosCumparaturi = await utilizator.getCosCumparaturi();
     const produse = await cosCumparaturi.getProduse({ where: { id: prodId } });
     const produs = produse[0];
-    const rezultat = await produs.produseCosCumparaturi.destroy();
-    res.status(200).json({ message: "Produs sters din cos!" });
+    await produs.produsCosCumparaturi.destroy();
+    const rezultat = await utilizator.getCosCumparaturi();
+    res
+      .status(200)
+      .json({ message: "Produs sters din cos!", result: rezultat });
   } catch (err) {
     if (!err.statusCode) {
       err.statusCode = 500;
@@ -165,18 +164,23 @@ exports.postComanda = async (req, res, next) => {
     const produse = await cosCumparaturi.getProduse();
 
     const adresa = req.body.adresa;
+    const oras = req.body.oras
+    const judet = req.body.judet
     const ziLivrare = req.body.ziLivrare;
     const intervalLivrare = req.body.intervalLivrare;
 
     const comanda = await utilizator.createComanda({
+      status: 'confirmata',
       adresa: adresa,
+      oras: oras,
+      judet: judet,
       ziLivrare: ziLivrare,
       intervalLivrare: intervalLivrare,
     });
     const rezultat = await comanda.addProdus(
       produse.map((prod) => {
         prod.produseComanda = {
-          cantitate: prod.produseCosCumparaturi.cantitate,
+          cantitate: prod.produsCosCumparaturi.cantitate,
         };
         return prod;
       })
@@ -184,7 +188,9 @@ exports.postComanda = async (req, res, next) => {
 
     cosExistent.setProduse(null);
 
-    res.status(201).json({ message: "Comanda creata cu succes!" });
+    res
+      .status(201)
+      .json({ message: "Comanda creata cu succes!", result: rezultat });
   } catch (err) {
     if (!err.statusCode) {
       err.statusCode = 500;
@@ -197,7 +203,7 @@ exports.getComenzi = async (req, res, next) => {
   try {
     const userId = req.body.userId;
     const utilizator = await Utilizator.findByPk(userId);
-    const comenzi = await utilizator.getComanda({ include: ["products"] });
+    const comenzi = await utilizator.getComenzi({ include: ["produse"] });
     res
       .status(200)
       .json({ message: "Comenzi afisate cu succes", comenzi: comenzi });
@@ -212,12 +218,12 @@ exports.getComenzi = async (req, res, next) => {
 exports.getComanda = async (req, res, next) => {
   try {
     const userId = req.body.userId;
-    const comandaId = req.body.comandaId;
+    const comandaId = req.params.comandaId;
     const utilizator = await Utilizator.findByPk(userId);
-    const comanda = await utilizator.getComanda(
-      { where: { id: comandaId } },
-      { include: ["products"] }
-    );
+    const comanda = await utilizator.getComenzi({
+      where: { id: comandaId },
+      include: ["produse"],
+    });
     res
       .status(200)
       .json({ message: "Comanda afisata cu succes", comanda: comanda });

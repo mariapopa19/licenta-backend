@@ -12,8 +12,15 @@ const Comanda = sequelize.define(
     status: {
       type: Sequelize.STRING,
     },
-    cantitate: Sequelize.INTEGER,
     adresa: {
+      type: Sequelize.STRING,
+      allowNull: false,
+    },
+    oras: {
+      type: Sequelize.STRING,
+      allowNull: false,
+    },
+    judet: {
       type: Sequelize.STRING,
       allowNull: false,
     },

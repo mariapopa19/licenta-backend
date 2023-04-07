@@ -16,6 +16,7 @@ const CategorieProdus = require("./models/categorie_produs");
 
 const authRoutes = require("./routes/auth");
 const shopRoutes = require("./routes/shop");
+const shipRoutes = require("./routes/ship");
 const adminRoutes = require("./routes/admin");
 
 const errorMiddleware = require("./middlewares/error").error;
@@ -55,13 +56,15 @@ Produs.belongsTo(CategorieProdus, { constraints: true });
 
 app.use("/auth", authRoutes);
 app.use("/shop", shopRoutes);
+app.use("/ship", shipRoutes);
 app.use("/admin", adminRoutes);
 
 app.use(errorMiddleware);
 
 sequlize
   // .sync({ force: true })
-  .sync()
+  // .sync()
+  .sync({ alter: true })
   // .drop()
   .then((res) => {
     // console.log(res);

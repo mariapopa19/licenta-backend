@@ -9,7 +9,7 @@ router.get("/cos-cumparaturi", shopController.getCosCumparaturi);
 router.post("/cos-cumparaturi", shopController.postCosCumparaturi);
 router.post('/scoate-produs-cos', shopController.postScoateProdusCosCumparaturi)
 router.delete(
-  "/sterge-produs-cos-cumparaturi",
+  "/sterge-produs-cos-cumparaturi/:userId/:prodId",
   shopController.deleteStergeProdusCosCumparaturi
 );
 router.post("/creaza-comanda", shopController.postComanda);
