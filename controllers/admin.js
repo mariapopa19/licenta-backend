@@ -2,6 +2,7 @@ const Produs = require("../models/produse");
 const Firma = require("../models/firme");
 const CategorieProdus = require("../models/categorie_produs");
 const PerioadaContractFirma = require("../models/perioada_contract_firme");
+const Comanda = require("../models/comenzi");
 
 exports.postFirma = async (req, res, next) => {
   try {
@@ -120,3 +121,60 @@ exports.patchMofificaProdus = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.deleteProdus = async (req, res, next) => {
+  try{
+    const produsId = req.params.produsId;
+    const produs = await Produs.findByPk(produsId)
+    await produs.destroy();
+    const produse = await Produs.findAll()
+    res.status(200).json({message: 'Produsul a fost sters', produse: produse})
+  } catch (err) {
+    if (!err.statusCode) {
+      err.statusCode = 500;
+    }
+    next(err);
+  }
+}
+
+exports.deleteFirma = async (req, res, next) => {
+  try {
+    const firmaId = req.params.firmaId;
+    const firma = await Firma.findByPk(firmaId);
+    await firma.destroy();
+    const firme = await Firma.findAll()
+    res.status(200).json({message: 'Firma a fost stearsa', firme: firme})
+  } catch (err) {
+    if (!err.statusCode) {
+      err.statusCode = 500;
+    }
+    next(err);
+  }
+}
+
+exports.deleteCategorie = async (req, res, next) => {
+  try {
+    const categorieId = req.params.categorieId;
+    const categorie = await CategorieProdus.findByPk(categorieId);
+    await categorie.destroy();
+    const categorii = await CategorieProdus.findAll()
+    res.status(200).json({message: 'Firma a fost stearsa', categorii: categorii})
+  } catch (err) {
+    if (!err.statusCode) {
+      err.statusCode = 500;
+    }
+    next(err);
+  }
+}
+
+exports.getComenzi = async (req, res, next) => {
+  try {
+    const comenzi = await Comanda.findAll()
+    res.status(200).json({message: 'Comenzi gasite cu succes', result: comenzi})
+  } catch (err) {
+    if (!err.statusCode) {
+      err.statusCode = 500;
+    }
+    next(err);
+  }
+}

@@ -13,6 +13,7 @@ const ProdusCosCumparaturi = require("./models/produse_cos_cumparaturi");
 const CosCumparaturi = require("./models/cos_cumparaturi");
 const Utilizator = require("./models/utilizatori");
 const CategorieProdus = require("./models/categorie_produs");
+const TransportComanda = require("./models/transport_comenzi");
 
 const authRoutes = require("./routes/auth");
 const shopRoutes = require("./routes/shop");
@@ -53,6 +54,10 @@ Firma.hasOne(PerioadaContractFirma);
 PerioadaContractFirma.belongsTo(Firma);
 CategorieProdus.hasMany(Produs);
 Produs.belongsTo(CategorieProdus, { constraints: true });
+Utilizator.hasOne(TransportComanda);
+TransportComanda.belongsTo(Utilizator);
+Comanda.hasOne(TransportComanda);
+TransportComanda.belongsTo(Comanda);
 
 app.use("/auth", authRoutes);
 app.use("/shop", shopRoutes);

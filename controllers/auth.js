@@ -32,15 +32,26 @@ exports.signup = async (req, res, next) => {
       process.env.ACCESS_TOKEN_SECRET,
       { expiresIn: "10min" }
     );
-    await sgMail.send({
-      to: email,
-      from: "maria_popa@365.univ-ovidius.ro",
-      subject: "Verifică-ți email-ul",
-      html: `<h3>Pentru a confirma email-ul apasă pe link-ul de mai jos: </h3>
-      <br>
-      <a href='http://localhost:4000/auth/verify/${token}'>http://localhost:4000/auth/verify/${token}</a>`,
+    const hashedPw = await bcrypt.hash(parola, 12);
+    const utilizator = await Utilizator.create({
+      email: email,
+      parola: hashedPw,
+      nume: nume,
+      curier: curier,
     });
-    res.status(200).json({ message: "Email de veridicare trimis", token: token });
+    await utilizator.createCosCumparaturi();
+    res
+      .status(201)
+      .json({ message: "Utilizator creat!", userId: utilizator.id });
+    // await sgMail.send({
+    //   to: email,
+    //   from: "maria_popa@365.univ-ovidius.ro",
+    //   subject: "Verifică-ți email-ul",
+    //   html: `<h3>Pentru a confirma email-ul apasă pe link-ul de mai jos: </h3>
+    //   <br>
+    //   <a href='http://localhost:4000/auth/verify/${token}'>http://localhost:4000/auth/verify/${token}</a>`,
+    // });
+    // res.status(200).json({ message: "Email de veridicare trimis", token: token });
   } catch (err) {
     if (!err.statusCode) {
       err.statusCode = 500;
