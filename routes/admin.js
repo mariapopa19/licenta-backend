@@ -16,10 +16,11 @@ router.delete("/categorie/:categorieId", adminController.deleteCategorie);
 router.get("/comenzi", adminController.getComenzi);
 router.get("/firme", adminController.getFirme);
 router.patch(
-  "firma/firmaId",
+  "firma/:firmaId",
   [body("dataSfarsitContract").isDate()],
   adminController.patchModificaFirma
 );
 router.get("/categorii", adminController.getCategorii);
+router.patch('/categorie/:categorieId', adminController.patchModificaCategorie)
 
 module.exports = router;
