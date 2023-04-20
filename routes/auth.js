@@ -10,7 +10,7 @@ router.post(
   [
     body("email")
       .isEmail()
-      .withMessage("Introdu o adresa de email valida.")
+      .withMessage("Introduce o adresa de email valida.")
       .custom(async (value, { req }) => {
         const email = await Utilizator.findOne({ where: { email: value } });
         if (email !== null) {
