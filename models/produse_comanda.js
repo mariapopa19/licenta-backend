@@ -9,6 +9,7 @@ const ProduseComanda = sequelize.define(
       defaultValue: Sequelize.UUIDV4,
       primaryKey: true,
     },
+    cantitate: Sequelize.INTEGER,
   },
   {
     name: {

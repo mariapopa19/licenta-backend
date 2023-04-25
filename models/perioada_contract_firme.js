@@ -10,10 +10,10 @@ const PerioadaContractFirma = sequelize.define(
       primaryKey: true,
     },
     data_inceput: {
-      type: Sequelize.DATE,
+      type: Sequelize.DATEONLY,
     },
     data_finalizare: {
-      type: Sequelize.DATE,
+      type: Sequelize.DATEONLY,
     },
   },
   {

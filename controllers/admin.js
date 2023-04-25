@@ -49,15 +49,30 @@ exports.getFirme = async (req, res, next) => {
 
 exports.patchModificaFirma = async (req, res, next) => {
   try {
-    const firmaId = reg.params.firmaId;
+    const firmaId = req.params.firmaId;
     const denumire = req.body.denumire;
-    const dataSfarsitContract = req.body.dataSfarsitContract;
-    await Firma.update({ denumire: denumire }, { where: { id: firmaId } });
-    await PerioadaContractFirma.update(
-      { data_finalizare: dataSfarsitContract },
-      { where: { firmaId: firmaId } }
+    const dataSfarsitContract = req.body.data_finalizare;
+    await Firma.update(
+      { denumire: denumire },
+      { where: { id: firmaId } }
     );
-    const firma = Firma.findAll({ include: PerioadaContractFirma });
+    if (dataSfarsitContract) {
+      const contract = await PerioadaContractFirma.findOne({
+        where: { firmaId: firmaId },
+      });
+      if (contract) {
+        await PerioadaContractFirma.update(
+          {
+            data_finalizare: dataSfarsitContract,
+          },
+          { where: { id: contract.id } }
+        );
+      }
+    }
+
+    const firma = await Firma.findByPk(firmaId, {
+      include: PerioadaContractFirma,
+    });
     res.status(200).json({ message: "Firma modificata", result: firma });
   } catch (err) {
     if (!err.statusCode) {
@@ -119,10 +134,11 @@ exports.patchModificaCategorie = async (req, res, next) => {
   try {
     const categorieId = req.params.categorieId;
     const denumire = req.body.denumire;
-    const categorie = await CategorieProdus.update(
+    await CategorieProdus.update(
       { denumire: denumire },
-      { where: { id: { categorieId } } }
+      { where: { id: categorieId } }
     );
+    const categorie = await CategorieProdus.findByPk(categorieId);
     res
       .status(200)
       .json({ message: "Categorie modificata cu succes", result: categorie });
@@ -251,10 +267,60 @@ exports.deleteProdus = async (req, res, next) => {
 
 exports.getComenzi = async (req, res, next) => {
   try {
-    const comenzi = await Comanda.findAll();
+    const comenzi = await Comanda.findAll({ include: Produs });
     res
       .status(200)
       .json({ message: "Comenzi gasite cu succes", result: comenzi });
+  } catch (err) {
+    if (!err.statusCode) {
+      err.statusCode = 500;
+    }
+    next(err);
+  }
+};
+
+exports.getComanda = async (req, res, next) => {
+  try {
+    const comandaId = req.params.comandaId;
+    const comanda = await Comanda.findByPk(comandaId, { include: Produs });
+    if (comanda === null) {
+      throw Error({
+        message: "Comanda nu a fost gasita",
+      });
+    }
+    res
+      .status(200)
+      .json({ message: "Comanda returnata cu succes", result: comanda });
+  } catch (err) {
+    if (!err.statusCode) {
+      err.statusCode = 500;
+    }
+    next(err);
+  }
+};
+
+exports.patchModificaComanda = async (req, res, next) => {
+  try {
+    const comandaId = req.params.comandaId;
+    const status = req.body.status;
+    const adresa = req.body.adresa;
+    const zi = req.body.ziLivrare;
+    const interval = req.body.interval;
+
+    await Comanda.update(
+      {
+        status: status,
+        adresa: adresa,
+        ziLivrare: zi,
+        intervalLivrare: interval,
+      },
+      { where: { id: comandaId } }
+    );
+
+    const comanda = await Comanda.findByPk(comandaId, { include: Produs });
+    res
+      .status(200)
+      .json({ message: "Comanda modificata cu succes", result: comanda });
   } catch (err) {
     if (!err.statusCode) {
       err.statusCode = 500;
