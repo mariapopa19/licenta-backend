@@ -5,9 +5,12 @@ const router = express.Router();
 
 router.get("/produse", shopController.getProduse);
 router.get("/produse/:produsId", shopController.getProdus);
-router.get("/cos-cumparaturi", shopController.getCosCumparaturi);
+router.get("/cos-cumparaturi/:userId", shopController.getCosCumparaturi);
 router.post("/cos-cumparaturi", shopController.postCosCumparaturi);
-router.post('/scoate-produs-cos', shopController.postScoateProdusCosCumparaturi)
+router.post(
+  "/scoate-produs-cos",
+  shopController.postScoateProdusCosCumparaturi
+);
 router.delete(
   "/sterge-produs-cos-cumparaturi/:userId/:prodId",
   shopController.deleteStergeProdusCosCumparaturi

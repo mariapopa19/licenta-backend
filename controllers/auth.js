@@ -140,7 +140,7 @@ exports.getSchimbaParola = async (req, res, next) => {
       await sgMail.send({
         to: email,
         from: "maria_popa@365.univ-ovidius.ro",
-        subject: "Schimă-ți parola",
+        subject: "Schimbă-ți parola",
         html: `<h3>Pentru a-ți schimba parola apasă pe link-ul de mai jos: </h3>
                 <br>
                 <a href='http://localhost:4000/auth/new-pass/${token}'>http://localhost:4000/auth/verify/${token}</a>`,

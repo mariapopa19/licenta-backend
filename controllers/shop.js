@@ -33,7 +33,7 @@ exports.getProdus = async (req, res, next) => {
 
 exports.getCosCumparaturi = async (req, res, next) => {
   try {
-    const userId = req.body.userId;
+    const userId = req.params.userId;
     const utilizator = await Utilizator.findByPk(userId);
     const cosCumparaturi = await utilizator.getCosCumparaturi();
     const produse = await cosCumparaturi.getProduse();
