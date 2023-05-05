@@ -16,7 +16,7 @@ router.delete(
   shopController.deleteStergeProdusCosCumparaturi
 );
 router.post("/creaza-comanda", shopController.postComanda);
-router.get("/comenzi", shopController.getComenzi);
-router.get("/comenzi/:comandaId", shopController.getComanda);
+router.get("/comenzi/:userId", shopController.getComenzi);
+router.get("/comenzi/:userId/:comandaId", shopController.getComanda);
 
 module.exports = router;

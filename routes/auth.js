@@ -23,18 +23,17 @@ router.post(
   ],
   authController.signup
 );
-router.get('/verify/:token', authController.verificaTokenEmail)
+router.get("/verify/:token", authController.verificaTokenEmail);
 
 router.post(
   "/login",
-  [
-    body("email").trim().isEmail(),
-    body("parola").trim().isLength({ min: 5 }),
-  ],
+  [body("email").trim().isEmail(), body("parola").trim().isLength({ min: 5 })],
   authController.login
 );
 
-router.get('/new-pass', authController.getSchimbaParola)
-router.post('/new-pass/:token', authController.postSchimbaParola)
+router.get("/new-pass", authController.getSchimbaParola);
+router.post("/new-pass/:token", authController.postSchimbaParola);
+router.get("/user/:token", authController.getDetaliiUser);
+router.patch("/user/:token", authController.patchDetaliiUser);
 
 module.exports = router;

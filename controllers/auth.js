@@ -145,9 +145,10 @@ exports.getSchimbaParola = async (req, res, next) => {
                 <br>
                 <a href='http://localhost:4000/auth/new-pass/${token}'>http://localhost:4000/auth/verify/${token}</a>`,
       });
-      res
-        .status(200)
-        .json({ message: "Email pentru schimbarea parolei trimis", token: token });
+      res.status(200).json({
+        message: "Email pentru schimbarea parolei trimis",
+        token: token,
+      });
     } else {
       res.status(404).json({ message: "Utilizatotul nu exista" });
     }
@@ -175,6 +176,51 @@ exports.postSchimbaParola = async (req, res, next) => {
     );
 
     res.status(200).json({ message: "Parola modificata cu succes!" });
+  } catch (err) {
+    if (!err.statusCode) {
+      err.statusCode = 500;
+    }
+    next(err);
+  }
+};
+
+exports.getDetaliiUser = async (req, res, next) => {
+  const token = req.params.token;
+  try {
+    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+    const userId = decoded.userId;
+
+    const utilizator = await Utilizator.findByPk(userId);
+    res
+      .status(200)
+      .json({ message: "Utilizator gasit cu succes", result: utilizator });
+  } catch (err) {
+    if (!err.statusCode) {
+      err.statusCode = 500;
+    }
+    next(err);
+  }
+};
+
+exports.patchDetaliiUser = async (req, res, next) => {
+  const token = req.params.token;
+  const nume = req.body.nume;
+  const email = req.body.email;
+  try {
+    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+    const userId = decoded.userId;
+
+    await Utilizator.update(
+      {
+        nume: nume,
+        email: email,
+      },
+      { where: { id: userId } }
+    );
+    const utilizator = await Utilizator.findByPk(userId);
+    res
+      .status(200)
+      .json({ message: "Utilizator actualizat cu succes", result: utilizator });
   } catch (err) {
     if (!err.statusCode) {
       err.statusCode = 500;

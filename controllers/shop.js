@@ -1,14 +1,16 @@
+const CategorieProdus = require("../models/categorie_produs");
+const Firma = require("../models/firme");
 const Produs = require("../models/produse");
 const Utilizator = require("../models/utilizatori");
-
+  
 exports.getProduse = async (req, res, next) => {
   try {
     const produse = await Produs.findAll();
-    const { numar_produse, randuri } = await Produs.findAndCountAll();
+    const  { count }  = await Produs.findAndCountAll({include: [Firma, CategorieProdus]});
     res.status(200).json({
       message: "Toate produsele au fost returnate!",
       produse: produse,
-      totalProduse: numar_produse,
+      totalProduse: count,
     });
   } catch (err) {
     if (!err.statusCode) {
@@ -21,7 +23,7 @@ exports.getProduse = async (req, res, next) => {
 exports.getProdus = async (req, res, next) => {
   try {
     const id = req.params.produsId;
-    const produs = await Produs.findByPk(id);
+    const produs = await Produs.findByPk(id, {include: Firma});
     res.status(200).json({ message: "Produs găsit!", produs: produs });
   } catch (err) {
     if (!err.statusCode) {
@@ -142,7 +144,7 @@ exports.deleteStergeProdusCosCumparaturi = async (req, res, next) => {
     const produse = await cosCumparaturi.getProduse({ where: { id: prodId } });
     const produs = produse[0];
     await produs.produsCosCumparaturi.destroy();
-    const rezultat = await utilizator.getCosCumparaturi();
+    const rezultat = await cosCumparaturi.getProduse();
     res
       .status(200)
       .json({ message: "Produs sters din cos!", result: rezultat });
@@ -201,7 +203,7 @@ exports.postComanda = async (req, res, next) => {
 
 exports.getComenzi = async (req, res, next) => {
   try {
-    const userId = req.body.userId;
+    const userId = req.params.userId;
     const utilizator = await Utilizator.findByPk(userId);
     const comenzi = await utilizator.getComenzi({ include: ["produse"] });
     res
@@ -217,7 +219,7 @@ exports.getComenzi = async (req, res, next) => {
 
 exports.getComanda = async (req, res, next) => {
   try {
-    const userId = req.body.userId;
+    const userId = req.params.userId;
     const comandaId = req.params.comandaId;
     const utilizator = await Utilizator.findByPk(userId);
     const comanda = await utilizator.getComenzi({
