@@ -2,6 +2,7 @@ const CategorieProdus = require("../models/categorie_produs");
 const Firma = require("../models/firme");
 const Produs = require("../models/produse");
 const Utilizator = require("../models/utilizatori");
+const jwt = require("jsonwebtoken");
   
 exports.getProduse = async (req, res, next) => {
   try {
@@ -35,7 +36,10 @@ exports.getProdus = async (req, res, next) => {
 
 exports.getCosCumparaturi = async (req, res, next) => {
   try {
-    const userId = req.params.userId;
+    const token = req.params.token;
+    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+    const userId = decoded.userId;
+
     const utilizator = await Utilizator.findByPk(userId);
     const cosCumparaturi = await utilizator.getCosCumparaturi();
     const produse = await cosCumparaturi.getProduse();
@@ -53,7 +57,9 @@ exports.getCosCumparaturi = async (req, res, next) => {
 
 exports.postCosCumparaturi = async (req, res, next) => {
   try {
-    const userId = req.body.userId;
+    const token = req.body.token;
+    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+    const userId = decoded.userId;
     const prodId = req.body.prodId;
     let cosCumpExistent;
     let nouaCantitate = 1;
@@ -91,7 +97,9 @@ exports.postCosCumparaturi = async (req, res, next) => {
 
 exports.postScoateProdusCosCumparaturi = async (req, res, next) => {
   try {
-    const userId = req.body.userId;
+    const token = req.body.token;
+    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+    const userId = decoded.userId;
     const prodId = req.body.prodId;
     let cosCumpExistent;
     let nouaCantitate = 1;
@@ -137,8 +145,11 @@ exports.postScoateProdusCosCumparaturi = async (req, res, next) => {
 
 exports.deleteStergeProdusCosCumparaturi = async (req, res, next) => {
   try {
+    const token = req.params.token;
+    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+    const userId = decoded.userId;
     const prodId = req.params.prodId;
-    const userId = req.params.userId;
+    
     const utilizator = await Utilizator.findByPk(userId);
     const cosCumparaturi = await utilizator.getCosCumparaturi();
     const produse = await cosCumparaturi.getProduse({ where: { id: prodId } });
@@ -159,7 +170,9 @@ exports.deleteStergeProdusCosCumparaturi = async (req, res, next) => {
 exports.postComanda = async (req, res, next) => {
   try {
     let cosExistent;
-    const userId = req.body.userId;
+    const token = req.body.token;
+    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+    const userId = decoded.userId;
     const utilizator = await Utilizator.findByPk(userId);
     const cosCumparaturi = await utilizator.getCosCumparaturi();
     cosExistent = cosCumparaturi;
@@ -203,7 +216,9 @@ exports.postComanda = async (req, res, next) => {
 
 exports.getComenzi = async (req, res, next) => {
   try {
-    const userId = req.params.userId;
+    const token = req.params.token;
+    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+    const userId = decoded.userId;
     const utilizator = await Utilizator.findByPk(userId);
     const comenzi = await utilizator.getComenzi({ include: ["produse"] });
     res
@@ -219,7 +234,9 @@ exports.getComenzi = async (req, res, next) => {
 
 exports.getComanda = async (req, res, next) => {
   try {
-    const userId = req.params.userId;
+    const token = req.params.token;
+    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+    const userId = decoded.userId;
     const comandaId = req.params.comandaId;
     const utilizator = await Utilizator.findByPk(userId);
     const comanda = await utilizator.getComenzi({
