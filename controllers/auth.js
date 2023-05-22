@@ -125,7 +125,7 @@ exports.login = async (req, res, next) => {
 };
 
 exports.getSchimbaParola = async (req, res, next) => {
-  const email = req.body.email;
+  const email = req.params.email;
   try {
     const utilizator = await Utilizator.findOne({ where: { email: email } });
 
@@ -143,7 +143,7 @@ exports.getSchimbaParola = async (req, res, next) => {
         subject: "Schimbă-ți parola",
         html: `<h3>Pentru a-ți schimba parola apasă pe link-ul de mai jos: </h3>
                 <br>
-                <a href='http://localhost:4000/auth/new-pass/${token}'>http://localhost:4000/auth/verify/${token}</a>`,
+                <a href='${process.env.CLIENT_URL}/resetare-parola/${token}'>${process.env.CLIENT_URL}/resetare-parola/${token}</a>`,
       });
       res.status(200).json({
         message: "Email pentru schimbarea parolei trimis",

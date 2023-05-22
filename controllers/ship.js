@@ -1,16 +1,23 @@
+const jwt = require("jsonwebtoken");
 const Utilizator = require("../models/utilizatori");
 const Comanda = require("../models/comenzi");
 const TransportComanda = require("../models/transport_comenzi");
+const Produs = require("../models/produse");
 
 exports.getComenzi = async (req, res, next) => {
   try {
-    const userId = req.body.userId;
-    const oras = req.body.oras;
+    const oras = req.params.oras;
+    const token = req.params.token;
+    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+    const userId = decoded.userId;
     const utilizator = await Utilizator.findOne({
       where: { id: userId, curier: true },
     });
     if (utilizator) {
-      const comenzi = await Comanda.findAll({ where: { oras: oras } });
+      const comenzi = await Comanda.findAll({
+        where: { oras: oras },
+        include: Produs,
+      });
       res
         .status(200)
         .json({ message: "Comenzi afisate cu succes!", comenzi: comenzi });
@@ -31,16 +38,18 @@ exports.getComenzi = async (req, res, next) => {
 
 exports.getComanda = async (req, res, next) => {
   try {
-    const userId = req.body.userId;
+    const token = req.params.token;
+    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+    const userId = decoded.userId;
     const comandaId = req.params.comandaId;
     const utilizator = await Utilizator.findOne({
       where: { id: userId, curier: true },
     });
     if (utilizator) {
-      const comenzi = await Comanda.findAll({ where: { id: comandaId } });
+      const comanda = await Comanda.findByPk(comandaId, { include: Produs });
       res
         .status(200)
-        .json({ message: "Comenzi afisate cu succes!", comenzi: comenzi });
+        .json({ message: "Comanda afisata cu succes!", comanda: comanda });
     } else {
       const err = {
         statusCode: 403,
@@ -58,7 +67,9 @@ exports.getComanda = async (req, res, next) => {
 
 exports.postComanda = async (req, res, next) => {
   try {
-    const userId = req.body.userId;
+    const token = req.body.token;
+    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+    const userId = decoded.userId;
     const comandaId = req.body.comandaId;
     const utilizator = await Utilizator.findOne({
       where: { id: userId, curier: true },
@@ -67,11 +78,14 @@ exports.postComanda = async (req, res, next) => {
       const comanda = await Comanda.findOne({ where: { id: comandaId } });
       const transport = await utilizator.createTransportComanda({
         comandaId: comanda.id,
-        status: 'in tranzit'
+        status: "in tranzit",
       });
-      await Comanda.update({status: 'in tranzit'}, {
-        where: {id: comanda.id}
-      })
+      await Comanda.update(
+        { status: "in tranzit" },
+        {
+          where: { id: comanda.id },
+        }
+      );
       res
         .status(200)
         .json({ message: "Comanda preluata cu success!", comenzi: transport });
@@ -92,16 +106,21 @@ exports.postComanda = async (req, res, next) => {
 
 exports.postComandaFinalizata = async (req, res, next) => {
   try {
-    const userId = req.body.userId;
+    const token = req.body.token;
+    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+    const userId = decoded.userId;
     const comandaId = req.body.comandaId;
     const utilizator = await Utilizator.findOne({
       where: { id: userId, curier: true },
     });
     if (utilizator) {
       let comanda = await Comanda.findOne({ where: { id: comandaId } });
-      await Comanda.update({status: 'finalizata'}, {
-        where: {id: comanda.id}
-      })
+      await Comanda.update(
+        { status: "finalizata" },
+        {
+          where: { id: comanda.id },
+        }
+      );
       const transport = await utilizator.getTransportComanda();
       await transport.destroy();
       comanda = await Comanda.findOne({ where: { id: comandaId } });
@@ -121,4 +140,4 @@ exports.postComandaFinalizata = async (req, res, next) => {
     }
     next(err);
   }
-}
+};

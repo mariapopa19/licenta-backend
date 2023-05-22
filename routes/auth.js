@@ -31,7 +31,7 @@ router.post(
   authController.login
 );
 
-router.get("/new-pass", authController.getSchimbaParola);
+router.get("/new-pass/:email", authController.getSchimbaParola);
 router.post("/new-pass/:token", authController.postSchimbaParola);
 router.get("/user/:token", authController.getDetaliiUser);
 router.patch("/user/:token", authController.patchDetaliiUser);
