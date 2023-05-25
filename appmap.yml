@@ -1,0 +1,9 @@
+name: gift-delivery-backend
+packages:
+  - path: controllers
+  - path: middlewares
+  - path: models
+  - path: routes
+  - path: utils
+language: javascript
+appmap_dir: tmp/appmap
