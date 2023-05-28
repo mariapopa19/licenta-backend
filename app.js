@@ -73,7 +73,6 @@ sequlize
   .sync({ alter: true })
   // .drop()
   .then((res) => {
-    // console.log(res);
     app.listen(4000);
   })
   .catch((err) => console.log(err));

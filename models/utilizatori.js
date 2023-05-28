@@ -23,7 +23,10 @@ const Utilizator = sequelize.define(
     },
     curier: {
       type: Sequelize.BOOLEAN,
-    },
+    }, 
+    admin: {
+      type: Sequelize.BOOLEAN,
+    }
   },
   {
     name: {

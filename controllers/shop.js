@@ -320,12 +320,13 @@ exports.postStripeCheckoutSession = async (req, res, next) => {
   }
 };
 
-exports.postStripeWebhooks = async (req, res) => {
+exports.postStripeWebhooks = async (req, res, next) => {
   let endpointSecret;
   const sig = req.headers["stripe-signature"];
 
   let data;
   let eventType;
+
 
   if (endpointSecret) {
     let event;
@@ -341,6 +342,7 @@ exports.postStripeWebhooks = async (req, res) => {
   } else {
     data = req.body.data.object;
     eventType = req.body.type;
+    console.log(req.body);
   }
 
   // Handle the event

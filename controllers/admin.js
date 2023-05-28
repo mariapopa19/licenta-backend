@@ -3,6 +3,8 @@ const Firma = require("../models/firme");
 const CategorieProdus = require("../models/categorie_produs");
 const PerioadaContractFirma = require("../models/perioada_contract_firme");
 const Comanda = require("../models/comenzi");
+const Utilizator = require("../models/utilizatori");
+const bcrypt = require("bcryptjs");
 
 exports.postFirma = async (req, res, next) => {
   try {
@@ -52,10 +54,7 @@ exports.patchModificaFirma = async (req, res, next) => {
     const firmaId = req.params.firmaId;
     const denumire = req.body.denumire;
     const dataSfarsitContract = req.body.data_finalizare;
-    await Firma.update(
-      { denumire: denumire },
-      { where: { id: firmaId } }
-    );
+    await Firma.update({ denumire: denumire }, { where: { id: firmaId } });
     if (dataSfarsitContract) {
       const contract = await PerioadaContractFirma.findOne({
         where: { firmaId: firmaId },
@@ -321,6 +320,97 @@ exports.patchModificaComanda = async (req, res, next) => {
     res
       .status(200)
       .json({ message: "Comanda modificata cu succes", result: comanda });
+  } catch (err) {
+    if (!err.statusCode) {
+      err.statusCode = 500;
+    }
+    next(err);
+  }
+};
+
+exports.getUtilizatori = async (req, res, next) => {
+  try {
+    const utilizatori = await Utilizator.findAll();
+    res.status(200).json({
+      message: "Utilizatorii au fost returnati cu succes",
+      result: utilizatori,
+    });
+  } catch (err) {
+    if (!err.statusCode) {
+      err.statusCode = 500;
+    }
+    next(err);
+  }
+};
+
+exports.postUtilizator = async (req, res, next) => {
+  try {
+    const email = req.body.email;
+    const parola = req.body.parola;
+    const nume = req.body.nume;
+    const curier = req.body.curier;
+    const admin = req.body.admin;
+    if (typeof curier === 'boolean' && typeof admin === 'boolean') {
+      const hashedPw = await bcrypt.hash(parola, 12);
+      const utilizator = await Utilizator.create({
+        email: email,
+        parola: hashedPw,
+        nume: nume,
+        curier: curier,
+        admin: admin,
+      });
+      await utilizator.createCosCumparaturi();
+      res
+        .status(201)
+        .json({ message: "Utilizator creat!", result: utilizator });
+    } else {
+      throw Error({
+        message: "Valorile de la admin si curier nu sunt boolean",
+        statusCode: 500,
+      });
+    }
+  } catch (err) {
+    if (!err.statusCode) {
+      err.statusCode = 500;
+    }
+    next(err);
+  }
+};
+
+exports.patchUtilizator = async (req, res, next) => {
+  try {
+    const userId = req.params.userId;
+    const email = req.body.email;
+    const nume = req.body.nume;
+
+    await Utilizator.update(
+      {
+        nume: nume,
+        email: email,
+      },
+      { where: { id: userId } }
+    );
+    const utilizator = await Utilizator.findByPk(userId);
+    res
+      .status(201)
+      .json({ message: "Utilizator actualizat!", userId: utilizator });
+  } catch (err) {
+    if (!err.statusCode) {
+      err.statusCode = 500;
+    }
+    next(err);
+  }
+};
+
+exports.deleteUtilizator = async (req, res, next) => {
+  try {
+    const userId = req.params.userId;
+    const utilizator = await Utilizator.findByPk(userId);
+    await utilizator.destroy();
+    const utilizatori = await Utilizator.findAll();
+    res
+      .status(200)
+      .json({ message: "Utilizatorul a fost sters", result: utilizatori });
   } catch (err) {
     if (!err.statusCode) {
       err.statusCode = 500;

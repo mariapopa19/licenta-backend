@@ -7,3 +7,15 @@ packages:
   - path: utils
 language: javascript
 appmap_dir: tmp/appmap
+test_recording:
+  test_commands:
+    - env:
+        DB_NAME: 'licenta'
+        DB_USER: 'root'
+        DB_PASS: '1234'
+        DB_HOST: 'localhost'
+        CLIENT_URL: 'http://localhost:3000'
+        ACCESS_TOKEN_SECRET: 'somesupersecretsecret'
+        SENDGRID_API_KEY:  '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'
+        STRIPE_KEY: 'sk_test_51N1xnMGOUcWF9kcOIakDvObGQSaRLo9Eebe61G4OmJs5MPnPNN4tu2mQxffrv5hLGielY5YfysWEdwQDHa4Ab3l500USo0USJd'
+      command: node app.js
