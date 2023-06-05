@@ -2,6 +2,7 @@ const express = require("express");
 const { check, body } = require("express-validator");
 const authController = require("../controllers/auth");
 const Utilizator = require("../models/utilizatori");
+const isAuth = require("../middlewares/is-auth");
 
 const router = express.Router();
 
@@ -33,7 +34,8 @@ router.post(
 
 router.get("/new-pass/:email", authController.getSchimbaParola);
 router.post("/new-pass/:token", authController.postSchimbaParola);
-router.get("/user/:token", authController.getDetaliiUser);
-router.patch("/user/:token", authController.patchDetaliiUser);
+router.get("/user", isAuth, authController.getDetaliiUser);
+router.patch("/user", isAuth, authController.patchDetaliiUser);
+router.get("/roluri", isAuth, authController.getRoluriUtilizator);
 
 module.exports = router;

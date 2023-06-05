@@ -2,11 +2,8 @@ const CategorieProdus = require("../models/categorie_produs");
 const Firma = require("../models/firme");
 const Produs = require("../models/produse");
 const Utilizator = require("../models/utilizatori");
-const jwt = require("jsonwebtoken");
-const dotenv = require("dotenv");
 const Stripe = require("stripe");
 
-dotenv.config();
 const stripe = Stripe(process.env.STRIPE_KEY);
 
 exports.getProduse = async (req, res, next) => {
@@ -32,6 +29,7 @@ exports.getProdus = async (req, res, next) => {
   try {
     const id = req.params.produsId;
     const produs = await Produs.findByPk(id, { include: Firma });
+
     res.status(200).json({ message: "Produs găsit!", produs: produs });
   } catch (err) {
     if (!err.statusCode) {
@@ -41,12 +39,47 @@ exports.getProdus = async (req, res, next) => {
   }
 };
 
-exports.getCosCumparaturi = async (req, res, next) => {
+exports.getCategoriiProduse = async (req, res, next) => {
   try {
-    const token = req.params.token;
-    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-    const userId = decoded.userId;
+    const categorii = await CategorieProdus.findAll();
+    res.status(200).json({
+      message: "Toate categoriile au fost returnate!",
+      categorii: categorii,
+    });
+  } catch (err) {
+    if (!err.statusCode) {
+      err.statusCode = 500;
+    }
+    next(err);
+  }
+};
 
+exports.getProduseCategorie = async (req, res, next) => {
+  const categorieId = req.params.categorieId;
+  try {
+    const produse = await Produs.findAll({
+      where: { categorieProdusId: categorieId },
+    });
+    const { count } = await Produs.findAndCountAll({
+      where: { categorieProdusId: categorieId },
+      include: [Firma, CategorieProdus],
+    });
+    res.status(200).json({
+      message: "Toate produsele au fost returnate!",
+      produse: produse,
+      count: count,
+    });
+  } catch (err) {
+    if (!err.statusCode) {
+      err.statusCode = 500;
+    }
+    next(err);
+  }
+};
+
+exports.getCosCumparaturi = async (req, res, next) => {
+  const userId = req.userId;
+  try {
     const utilizator = await Utilizator.findByPk(userId);
     const cosCumparaturi = await utilizator.getCosCumparaturi();
     const produse = await cosCumparaturi.getProduse();
@@ -63,10 +96,8 @@ exports.getCosCumparaturi = async (req, res, next) => {
 };
 
 exports.postCosCumparaturi = async (req, res, next) => {
+  const userId = req.userId;
   try {
-    const token = req.body.token;
-    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-    const userId = decoded.userId;
     const prodId = req.body.prodId;
     let cosCumpExistent;
     let nouaCantitate = 1;
@@ -103,11 +134,9 @@ exports.postCosCumparaturi = async (req, res, next) => {
 };
 
 exports.postScoateProdusCosCumparaturi = async (req, res, next) => {
+  const userId = req.userId;
+  const prodId = req.body.prodId;
   try {
-    const token = req.body.token;
-    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-    const userId = decoded.userId;
-    const prodId = req.body.prodId;
     let cosCumpExistent;
     let nouaCantitate = 1;
 
@@ -151,12 +180,9 @@ exports.postScoateProdusCosCumparaturi = async (req, res, next) => {
 };
 
 exports.deleteStergeProdusCosCumparaturi = async (req, res, next) => {
+  const userId = req.userId;
+  const prodId = req.params.prodId;
   try {
-    const token = req.params.token;
-    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-    const userId = decoded.userId;
-    const prodId = req.params.prodId;
-
     const utilizator = await Utilizator.findByPk(userId);
     const cosCumparaturi = await utilizator.getCosCumparaturi();
     const produse = await cosCumparaturi.getProduse({ where: { id: prodId } });
@@ -175,21 +201,18 @@ exports.deleteStergeProdusCosCumparaturi = async (req, res, next) => {
 };
 
 exports.postComanda = async (req, res, next) => {
+  const userId = req.userId;
+  const adresa = req.body.adresa;
+  const oras = req.body.oras;
+  const judet = req.body.judet;
+  const ziLivrare = req.body.ziLivrare;
+  const intervalLivrare = req.body.intervalLivrare;
   try {
     let cosExistent;
-    const token = req.body.token;
-    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-    const userId = decoded.userId;
     const utilizator = await Utilizator.findByPk(userId);
     const cosCumparaturi = await utilizator.getCosCumparaturi();
     cosExistent = cosCumparaturi;
     const produse = await cosCumparaturi.getProduse();
-
-    const adresa = req.body.adresa;
-    const oras = req.body.oras;
-    const judet = req.body.judet;
-    const ziLivrare = req.body.ziLivrare;
-    const intervalLivrare = req.body.intervalLivrare;
 
     const comanda = await utilizator.createComanda({
       status: "confirmata",
@@ -222,10 +245,9 @@ exports.postComanda = async (req, res, next) => {
 };
 
 exports.getComenzi = async (req, res, next) => {
+  const userId = req.userId;
+
   try {
-    const token = req.params.token;
-    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-    const userId = decoded.userId;
     const utilizator = await Utilizator.findByPk(userId);
     const comenzi = await utilizator.getComenzi({ include: ["produse"] });
     res
@@ -240,10 +262,9 @@ exports.getComenzi = async (req, res, next) => {
 };
 
 exports.getComanda = async (req, res, next) => {
+  const userId = req.userId;
+
   try {
-    const token = req.params.token;
-    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-    const userId = decoded.userId;
     const comandaId = req.params.comandaId;
     const utilizator = await Utilizator.findByPk(userId);
     const comanda = await utilizator.getComenzi({
@@ -262,15 +283,13 @@ exports.getComanda = async (req, res, next) => {
 };
 
 exports.postStripeCheckoutSession = async (req, res, next) => {
-  const token = req.body.token;
+  const userId = req.userId;
   const adresa = req.body.adresa;
   const oras = req.body.oras;
   const judet = req.body.judet;
   const ziLivrare = req.body.ziLivrare;
   const oraLivrare = req.body.oraLivrare;
   try {
-    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-    const userId = decoded.userId;
     const utilizator = await Utilizator.findByPk(userId);
     const cosCumparaturi = await utilizator.getCosCumparaturi();
     const produse = await cosCumparaturi.getProduse();
@@ -283,7 +302,6 @@ exports.postStripeCheckoutSession = async (req, res, next) => {
         judet: judet,
         ziLivrare: ziLivrare,
         oraLivrare: oraLivrare,
-        // TODO - de adaugat restul datelor necesare, cum ar fi adresa, ora si ziua de livrare
       },
     });
 
@@ -327,7 +345,6 @@ exports.postStripeWebhooks = async (req, res, next) => {
   let data;
   let eventType;
 
-
   if (endpointSecret) {
     let event;
     try {
@@ -350,14 +367,16 @@ exports.postStripeWebhooks = async (req, res, next) => {
     const customer = await stripe.customers.retrieve(data.customer);
     try {
       let cosExistent;
-      const decoded = jwt.verify(customer.metadata.token, process.env.ACCESS_TOKEN_SECRET);
+      const decoded = jwt.verify(
+        customer.metadata.token,
+        process.env.ACCESS_TOKEN_SECRET
+      );
       const userId = decoded.userId;
       const utilizator = await Utilizator.findByPk(userId);
       const cosCumparaturi = await utilizator.getCosCumparaturi();
       cosExistent = cosCumparaturi;
       const produse = await cosCumparaturi.getProduse();
 
-  
       const comanda = await utilizator.createComanda({
         status: "confirmata",
         adresa: customer.metadata.adresa,
@@ -374,9 +393,9 @@ exports.postStripeWebhooks = async (req, res, next) => {
           return prod;
         })
       );
-  
+
       cosExistent.setProduse(null);
-  
+
       res
         .status(201)
         .json({ message: "Comanda creata cu succes!", result: rezultat });

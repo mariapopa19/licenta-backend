@@ -115,7 +115,7 @@ exports.login = async (req, res, next) => {
       process.env.ACCESS_TOKEN_SECRET,
       { expiresIn: "1h" }
     );
-    res.status(200).json({ token: token, userId: loadedUser.id });
+    res.status(200).json({ token: token, utilizator: utilizator });
   } catch (err) {
     if (!err.statusCode) {
       err.statusCode = 500;
@@ -185,11 +185,8 @@ exports.postSchimbaParola = async (req, res, next) => {
 };
 
 exports.getDetaliiUser = async (req, res, next) => {
-  const token = req.params.token;
+  const userId = req.userId;
   try {
-    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-    const userId = decoded.userId;
-
     const utilizator = await Utilizator.findByPk(userId);
     res
       .status(200)
@@ -203,13 +200,10 @@ exports.getDetaliiUser = async (req, res, next) => {
 };
 
 exports.patchDetaliiUser = async (req, res, next) => {
-  const token = req.params.token;
+  const userId = req.userId;
   const nume = req.body.nume;
   const email = req.body.email;
   try {
-    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-    const userId = decoded.userId;
-
     await Utilizator.update(
       {
         nume: nume,
@@ -228,3 +222,18 @@ exports.patchDetaliiUser = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.getRoluriUtilizator = async (req, res, next) => {
+  const userId = req.userId;
+  try {
+    const utilizator = await Utilizator.findByPk(userId);
+    res
+      .status(200)
+      .json({ message: "Rolurile utilizatorului returnate cu succes", admin: utilizator.admin, curier: utilizator.curier });
+  } catch (err) {
+    if (!err.statusCode) {
+      err.statusCode = 500;
+    }
+    next(err);
+  }
+}
